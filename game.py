@@ -1,69 +1,97 @@
-coordinatesBoardArray = []
-ownershipBoardArray = []
 
-boardDimension = 7
+validPositionsList = [[0,3,6],[1,3,5],[2,3,4],[0,1,2,4,5,6],[2,3,4],[1,3,5],[0,3,6]]
+# nullColumnsList = [[2,3,5,6],[1,3,5,7],[1,2,6,7],[4],[1,2,6,7],[1,3,5,7],[2,3,5,6]]
 
-coordinatesBoardArray = [[0 for x in range(boardDimension)] for y in range(boardDimension)] 
-ownershipBoardArray = [[0 for x in range(boardDimension)] for y in range(boardDimension)] 
+playerColorDict = {1: "white", 2: "black"}
 
-nullCoordinatesList = [[2,3,5,6],[1,3,5,7],[1,2,6,7],[4],[1,2,6,7],[1,3,5,7],[2,3,5,6]]
+middlePositions = [(0,3), (1,3), (2,3), (3,0), (3,1), (3,2), (3,4), (3,5), (3,6), (4,3), (5,3), (6,3)]
 
-player = 1
+neighboursDictionary = {
+    (0,0) : [(0,3), (3,0)],
+    (0,3) : [(0,0), (0,6), (1,3)],
+    (0,6) : [(0,3), (3,6)],
+    (1,1) : [(1,1), (1,3), (1,5)],
+    (1,3) : [(1,1), (1,5), (2,3), (0,3)],
+    (1,5) : [(1,3), (3,5)],
+    (2,2) : [(2,3), (3,2)],
+    (2,3) : [(2,2), (2,4), (1,3)],
+    (2,4) : [(2,3), (3,4)],
+    (3,0) : [(3,1), (6,0), (0,0)],
+    (3,1) : [(3,0), (3,2), (5,1), (1,1)], 
+    (3,2) : [(3,1), (4,2), (2,2)],
+    (3,4) : [(3,5), (4,4), (2,4)], 
+    (3,5) : [(3,4), (3,6), (5,5), (1,5)], 
+    (3,6) : [(3,5), (6,6), (0,6)],
+    (4,2) : [(4,3), (3,2)],
+    (4,3) : [(4,2), (4,4), (5,3)],
+    (4,4) : [(4,3), (3,4)],
+    (5,1) : [(3,1), (5,3)],
+    (5,3) : [(5,1), (5,5), (6,3), (4,3)],
+    (5,5) : [(5,3), (3,5)],
+    (6,0) : [(6,3), (3,0)],
+    (6,3) : [(6,0), (6,6), (5,3)],
+    (6,6) : [(6,3), (3,6)]
+}
 
-def createCoordinatesBoard():
-    for i in range(boardDimension): 
-        for j in range(boardDimension):
-            coordinatesBoardArray[i][j] = [i + 1, j + 1]
+# Use c profiler python3 -m cProfile boggle.py
+
+gameBoardDictionary = {}
+
+def createGameBoard():
+    gameBoardDictionary = {(i, j) : "empty" for i in range(7) for j in range(7) for k in validPositionsList[i] if j == k}
+    return gameBoardDictionary
+
+def userTurn(currentPlayer, gameBoardDictionary):
     
-def zeroNullCoordinates ():
-    for h in range(boardDimension):
-        for i in range(boardDimension):
-            for j in nullCoordinatesList[h]:
-                if(coordinatesBoardArray[h][i][1] == j):
-                    coordinatesBoardArray[h][i][1] = 0
-                    coordinatesBoardArray[h][i][0] = 0
+    positionToPlace = getCoordinatesFromUser(currentPlayer)
+    
+    if (gameBoardDictionary[positionToPlace] == "empty"): 
+        
+        gameBoardDictionary[(positionToPlace)] = playerColorDict[currentPlayer]
+        if(threeInARow(gameBoardDictionary)):
+            print("Three in a Row!")
+            gameBoardDictionary = removeOpponentPiece(currentPlayer)
             
-def printCoordinatesBoard():
-    for i in range(boardDimension): 
-        print(coordinatesBoardArray[i])
+        print(gameBoardDictionary)
+        return gameBoardDictionary
         
-def createOwnershipBoard():
-    for i in range(boardDimension): 
-        for j in range(boardDimension):
-            ownershipBoardArray[i][j] = "    "
-        
-def printOwnershipBoard():
-    for i in range(boardDimension): 
-        print(ownershipBoardArray[i])
-        
-def userTurn(player):
-    userInput = [0,0];
-    if(player == 1):
-        userInput[0] = int(input("P1 enter y-coordinate of piece: "))
-        userInput[1] = int(input("P1 enter x-coordinate of piece: "))
-    if(player == 2):
-        userInput[0] = int(input("P2 enter y-coordinate of piece: "))
-        userInput[1] = int(input("P2 enter x-coordinate of piece: "))
-    
-    if coordinatesBoardArray[userInput[0]][userInput[1]] == [0,0]:
-        print("You can't place a piece here.")
-        
-    else: 
-        if(player == 1):
-            ownershipBoardArray[userInput[0]][userInput[1]] = "whit"
-            printOwnershipBoard()
-            userTurn(2)
-        elif(player == 2):
-            ownershipBoardArray[userInput[0]][userInput[1]] = "blak"
-            printOwnershipBoard()
-            userTurn(1)
-        
-createCoordinatesBoard()
-zeroNullCoordinates()
-printCoordinatesBoard()
-print('\n\n')
-createOwnershipBoard()
-printOwnershipBoard()
+    else:
+        print ("Invalid move")
+        userTurn(currentPlayer, gameBoardDictionary)
 
+def getCoordinatesFromUser(currentPlayer):
+
+    y = int(input("P{} enter y-coordinate of piece: ".format(currentPlayer)))
+    x = int(input("P{} enter x-coordinate of piece: ".format(currentPlayer)))
+    return (x, y)
+    
+def threeInARow(gameBoardDictionary):
+    for position in middlePositions:
+        if(checkNeighboursAreSameColor(position)):
+            return True
+            
+
+def checkNeighboursAreSameColor(position):
+    for i in neighboursDictionary[position]:
+        for j in neighboursDictionary[position]:
+            if (gameBoardDictionary[i] == gameBoardDictionary[j]) and (i != j) and (gameBoardDictionary[i] != "empty") and ((i[0] == j[0]) or (i[1] == j[1])):
+                return True
+    return False
+
+def removeOpponentPiece(currentPlayer):
+    positionToRemove = getCoordinatesFromUser(currentPlayer)
+    if (gameBoardDictionary[(positionToRemove)] != "empty" and gameBoardDictionary[(positionToRemove)] != playerColorDict[currentPlayer]): 
+        gameBoardDictionary[(positionToRemove)] = "empty"
+        return gameBoardDictionary
+        
+    else:
+        print ("Invalid move")
+        removeOpponentPiece(currentPlayer)
+
+def play(gameBoardDictionary):
+    userTurn(1, gameBoardDictionary)
+    userTurn(2, gameBoardDictionary)
+    
+gameBoardDictionary = createGameBoard()
 while(True):
-    userTurn(player)
+    play(gameBoardDictionary)
