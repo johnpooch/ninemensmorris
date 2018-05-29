@@ -1,0 +1,21 @@
+
+.svg {
+    position: relative;
+}
+
+.piece {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    background-size: contain;
+    margin: 0;
+    padding: 0;
+}
+.white {
+    background-image: url("../images/white_piece.png");
+}
+.black {
+    background-image: url("../images/black_piece.png");
+}
+
+/* positioning is  100px plus (coordinate*40) pixels */
