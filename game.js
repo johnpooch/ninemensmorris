@@ -6,7 +6,9 @@ function placePiece(gameState, position) {
     displayNewPiece(gameState, position);
 
     gameState = checkForMill(gameState);
-    gameState = changePlayer(gameState);
+    if(gameState.gameMode != "removePiece") {
+        gameState = changePlayer(gameState);
+    }
     return gameState;
 }
 
@@ -26,6 +28,7 @@ function displayNewPiece(gameState, position) {
     var div = document.createElement('div');
     console.log(gameState.currentPlayer);
     div.setAttribute('class', 'piece ' + gameState.currentPlayer);
+    div.setAttribute("id", position[0] + "," + position[1]);
 
     console.log(position);
 
@@ -37,26 +40,6 @@ function displayNewPiece(gameState, position) {
     
     div.setAttribute("onclick", "pieceClicked([" + position[0] + "," + position[1] +"])");
     document.body.appendChild(div);
-}
-
-// removePiece ------------------------------------------------------------------------------------
-
-function removePiece(gameState, position) {
-    removePieceFromGameBoarde(position, currentPlayer);
-    gameState.gameMode = "placePiece";
-    currentPlayer = changePlayer();
-}
-
-// removePieceFromGameBoard -----------------------------------------------------------------------
-
-function removePieceFromGameBoard(currentPlayer) {
-    if (gameBoard[position] != "empty" && gameBoard[position] != currentPlayer) {
-        gameBoard[position] = "empty";
-    }
-    console.log("GameBoard updated.")
-    return gameBoard
-
-    return true;
 }
 
 // checkForMill -----------------------------------------------------------------------------------
@@ -76,6 +59,34 @@ function checkForMill(gameState) {
         }
     }
     return gameState;
+}
+
+// removePiece ------------------------------------------------------------------------------------
+
+function removePiece(gameState, position) {
+    gameState = removePieceFromGameBoard(gameState, position);
+    removePieceFromDisplay(position);
+    gameState.gameMode = "placePiece";
+    gameState = changePlayer(gameState);
+    console.log(gameState.currentPlayer);
+    return gameState;
+}
+
+// removePieceFromGameBoard -----------------------------------------------------------------------
+
+function removePieceFromGameBoard(gameState, position) {
+    console.log(gameState);
+    console.log(position);
+    if (gameState.gameBoard[position] != "empty" && gameState.gameBoard[position] != gameState.currentPlayer) {
+        gameState.gameBoard[position] = "empty";
+    }
+    return gameState;
+}
+
+// removePieceFromDisplay -------------------------------------------------------------------------
+
+function removePieceFromDisplay(position) {
+    var div = document.getElementById(position[0]+ "," + position[1]).remove();
 }
 
 // changePlayer -----------------------------------------------------------------------------------
@@ -101,6 +112,6 @@ function emptyClicked(position) {
 
 function pieceClicked(position) {
     if (gameState.gameMode == "removePiece") {
-        removePiece(position);
+        gameState = removePiece(gameState, position);
     }
 }
