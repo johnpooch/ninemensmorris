@@ -1,74 +1,55 @@
-function createGameBoard() {
-    var gameBoard = {};
-    for (var i = 0; i < sortedPositions.length; i++) {
-        gameBoard[sortedPositions[i]] = "empty";
-    }
-    return gameBoard;
+
+// placePiece -------------------------------------------------------------------------------------
+
+function placePiece(gameState, position) {
+    gameState = addPieceToGameBoard(gameState, position);
+    displayNewPiece(gameState, position);
+
+    gameState = checkForMill(gameState);
+    gameState = changePlayer(gameState);
+    return gameState;
 }
 
-function updateGameBoard(position) {
-    if (gameBoard[position] == "empty") {
-        gameBoard[position] = currentPlayer;
+// addPieceToGameBoard ----------------------------------------------------------------------------
+
+function addPieceToGameBoard(gameState, position) {
+    if (gameState.gameBoard[position] == "empty") {
+        gameState.gameBoard[position] = gameState.currentPlayer;
     }
-    console.log("GameBoard updated.")
-    return gameBoard
+    return gameState;
 }
 
+// displayNewPiece --------------------------------------------------------------------------------
 
-function checkForMill(gameBoard, currentPlayer) {
-    for (var i = 0; i < millCombinations.length; i++) {
-        var winning = true;
-        for (var j = 0; j < millCombinations[i].length; j++) {
-            if (gameBoard[millCombinations[i][j]] != currentPlayer) {
-                winning = false;
-            }
-        }
-        if (winning) {
-            return i;
-        }
-    }
-    return -1;
+function displayNewPiece(gameState, position) {
+    var svg = document.getElementsByTagName('svg')[0];
+    var div = document.createElement('div');
+    console.log(gameState.currentPlayer);
+    div.setAttribute('class', 'piece ' + gameState.currentPlayer);
+
+    console.log(position);
+
+    var leftPosition = 10 + (position[0]*scaleMultiplier);
+    var topPosition = 80 + (position[1]*scaleMultiplier);
+
+    div.style.left = leftPosition + "px";
+    div.style.top = topPosition + "px";
+    
+    div.setAttribute("onclick", "pieceClicked([" + position[0] + "," + position[1] +"])");
+    document.body.appendChild(div);
 }
 
-function changePlayer() {
-    if (currentPlayer == "white") {
-        return "black";
-    }
-    else {
-        return "white";
-    }
-}
-var gameBoard = createGameBoard()
-console.log(gameBoard);
+// removePiece ------------------------------------------------------------------------------------
 
-function emptyClicked(position) {
-    if (gameMode == "placePiece") {
-        placePiece(position);
-    }
+function removePiece(gameState, position) {
+    removePieceFromGameBoarde(position, currentPlayer);
+    gameState.gameMode = "placePiece";
+    currentPlayer = changePlayer();
 }
 
-function pieceClicked(position) {
-    if (gameMode == "removePiece") {
-        removePiece(position);
-    }
-}
+// removePieceFromGameBoard -----------------------------------------------------------------------
 
-function placePiece(position) {
-    console.log(gameMode);
-
-    gameBoard = updateGameBoard(position);
-    displayNewPiece(position, currentPlayer);
-
-    if (checkForMill(gameBoard, currentPlayer) != -1) {
-        console.log("Mill!");
-        gameMode = "removePiece";
-    }
-    else {
-        currentPlayer = changePlayer();
-    }
-}
-
-function updateGameBoardRemove(currentPlayer) {
+function removePieceFromGameBoard(currentPlayer) {
     if (gameBoard[position] != "empty" && gameBoard[position] != currentPlayer) {
         gameBoard[position] = "empty";
     }
@@ -78,8 +59,48 @@ function updateGameBoardRemove(currentPlayer) {
     return true;
 }
 
-function removePiece(position) {
-    updateGameBoardRemiove(position, currentPlayer);
-    gameMode = "placePiece";
-    currentPlayer = changePlayer();
+// checkForMill -----------------------------------------------------------------------------------
+
+function checkForMill(gameState) {
+    for (var i = 0; i < millCombinations.length; i++) {
+        var winning = true;
+        for (var j = 0; j < millCombinations[i].length; j++) {
+            if (gameState.gameBoard[millCombinations[i][j]] != gameState.currentPlayer) {
+                winning = false;
+            }
+        }
+        if (winning) {
+            gameState.gameMode = "removePiece";
+            console.log("Mill!");
+            return gameState;
+        }
+    }
+    return gameState;
+}
+
+// changePlayer -----------------------------------------------------------------------------------
+
+function changePlayer(gameState) {
+    if (gameState.currentPlayer == "white") {
+        gameState.currentPlayer = "black";
+        return gameState;
+    }
+    gameState.currentPlayer = "white";
+    return gameState;
+}
+
+// emptyClicked -----------------------------------------------------------------------------------
+
+function emptyClicked(position) {
+    if (gameState.gameMode == "placePiece") {
+        gameState = placePiece(gameState, position);
+    }
+}
+
+// pieceClicked -----------------------------------------------------------------------------------
+
+function pieceClicked(position) {
+    if (gameState.gameMode == "removePiece") {
+        removePiece(position);
+    }
 }

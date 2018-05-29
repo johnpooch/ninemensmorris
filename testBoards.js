@@ -107,3 +107,30 @@ var testBoard4 = {
     "6,3":"empty",
     "6,6":"empty"
 }
+
+var testBoard5 = {
+    "0,0":"white",
+    "0,3":"empty",
+    "0,6":"empty",
+    "1,1":"empty",
+    "1,3":"empty",
+    "1,5":"empty",
+    "2,2":"empty",
+    "2,3":"empty",
+    "2,4":"empty",
+    "3,0":"empty",
+    "3,1":"empty",
+    "3,2":"empty",
+    "3,4":"empty",
+    "3,5":"empty",
+    "3,6":"empty",
+    "4,2":"empty",
+    "4,3":"empty",
+    "4,4":"empty",
+    "5,1":"empty",
+    "5,3":"empty",
+    "5,5":"empty",
+    "6,0":"empty",
+    "6,3":"empty",
+    "6,6":"empty"
+}
